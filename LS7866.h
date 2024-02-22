@@ -9,7 +9,7 @@
 
 
 /** Necessary library for STM32 HAL */
-#include "stm32l4xx_hal.h" /* Swap the library based on you hardware*/
+#include "stm32l4xx_hal.h" /* Swap the HAL library based on you hardware*/
 
 /** Default LS7866 I2C register address. */
 #define LS7866_MCR0 0x00 /* RD&WR */
@@ -89,28 +89,84 @@
 #define DSTR_RST_CNTR   0x01 << 6
 
 //Load or not load the SSTR with DSTR when CNTR is read, B[7]
-#define SSTR_NLOAD_CNTR  0x00 << 7
-#define SSTR_LOAD_CNTR   0x01 << 7
+#define SSTR_NLOAD_CNTR_RD  0x00 << 7
+#define SSTR_LOAD_CNTR_RD   0x01 << 7
 
+/* FCR configuration data
+   The configutation byte is formed by choosing one element from each group.
+   Note: At power-up the FCR is cleared to 0.
+*/
+// FCR register bits
+#define ENABLE_CY       0x01u  // Bit 0: Enable CY (CNTR Overflow)
+#define ENABLE_BW       0x02u  // Bit 1: Enable BW (CNTR Underflow)
+#define ENABLE_EQL0     0x04u  // Bit 2: Enable EQL0 (CNTR = IDR0)
+#define ENABLE_EQL1     0x08u  // Bit 3: Enable EQL1 (CNTR = IDR1)
+#define ENABLE_IDX      0x10u  // Bit 4: Enable IDX (Z Input Active)
+#define ENABLE_EQL1TGL  0x20u  // Bit 5: Enable EQL1TGL (Toggle at CNTR = IDR1)
+#define ENABLE_BWTGL    0x40u  // Bit 6: Enable BWTGL (Toggle at BW)
+#define ENABLE_DIR      0x80u  // Bit 7: Enable Count Direction (DFLAG: 0=DOWN, 1=UP)
 
+/* TPR configuration data
+   The configutation byte is formed by choosing one element from each group.
+   Note: Data written into TPR are not stored, thereby releasing the referenced registers for normal operation following a write to TPR.
+*/
+#define RCNT            0x01u  // Bit 0: Reset CNTR (CNTR <= 0)( B[0] = 1 overrides B[1], B[2] and B[6] )
+#define LCI0            0x02u  // Bit 1: Load CNTR with IDR0 (CNTR <= IDR0)
+#define LCI1            0x04u  // Bit 2: Load CNTR with IDR1 (CNTR <= IDR1)
+#define LODC            0x08u  // Bit 3: Load ODR with CNTR (ODR <= CNTR)
+#define LSST            0x10u  // Bit 4: Load SSTR with DSTR (SSTR <= DSTR)
+#define RDST            0x20u  // Bit 5: Reset DSTR (DSTR <= 0) and LFLAG/ 
+// no function for Bit 6
+#define MRST            0x80u  // Bit 7: Resets IDR0, IDR1, CNTR, ODR, DSTR, SSTR and LFLAG/(MRST overrides B[1] through B[4] and B[6].) 
+
+/* SSTR bit definition
+   Use the definition as bit mask
+   Note: SSTR stores the instataneous snap-shot of the DSTR, and is reset to 0 at power-up
+
+   Ways to capture the DSTR in SSTR
+    * Event control such as Z input
+    * Program control with LSST command
+    * Configure MCR1 so that DSTR is capture when CNTR is read (LSST command automatically executed after LODC command 
+*/
+#define PLS             0x01u  // Bit 0: Set to one upon power up. "Power loss" indicator
+#define CE              0x02u  // Bit 1: High indicates "counting enabled"
+#define IDX             0x04u  // Bit 2: High indicates Z input in active state
+#define EQL0            0x08u  // Bit 3: High indicates CNTR = IDR0
+#define EQL1            0x10u  // Bit 4: High indicates CNTR = IDR1
+#define BW              0x20u  // Bit 5: High indicates CNTR underflow
+#define CY              0x40u  // Bit 6: High indicates CNTR overflow
+#define UD              0x80u  // Bit 7: High indicates count up, low indicates count down
 
 
 class LS7866
 {
 private:
     /* data */
+    // HAL handler
+    I2C_HandleTypeDef *i2c_hal;
+    uint8_t device_address
+
+
 public:
-    /* deviceAddress = 0x70 .. 0x77 */
-    /* device address is set by pin A0, A1, and A2*/
+    /*  deviceAddress = 0x70 .. 0x77 
+        device address is set by pin A0, A1, and A2
+        
+        *A2 A1 A0 = 000 -> 0x70
+        *A2 A1 A0 = 001 -> 0x71
+        *A2 A1 A0 = 010 -> 0x72
+        *A2 A1 A0 = 011 -> 0x73
+        *A2 A1 A0 = 100 -> 0x74
+        *A2 A1 A0 = 101 -> 0x75
+        *A2 A1 A0 = 110 -> 0x76
+        *A2 A1 A0 = 111 -> 0x77
+    */
     LS7866(uint8_t deviceAddress, I2C_HandleTypeDef *hi2c);
     bool begin();
     bool 
     
 };
 
-LS7866::LS7866(/* args */)
-{
-}
+
 
 
 
