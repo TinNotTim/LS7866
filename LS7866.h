@@ -11,6 +11,13 @@
 /** Necessary library for STM32 HAL */
 #include "stm32l4xx_hal.h" /* Swap the HAL library based on you hardware*/
 
+/** Define Register address size and register size in byte*/
+#define LS7866_REG_ADD_SIZE 0x1
+#define LS7866_DATA_SIZE_1 0x1 
+#define LS7866_DATA_SIZE_2 0x2
+#define LS7866_DATA_SIZE_3 0x3
+#define LS7866_DATA_SIZE_4 0x4
+
 /** Default LS7866 I2C register address. */
 #define LS7866_MCR0 0x00 /* RD&WR */
 #define LS7866_MCR1 0x01 /* RD&WR */
@@ -144,7 +151,7 @@ private:
     /* data */
     // HAL handler
     I2C_HandleTypeDef *i2c_hal;
-    uint8_t device_address
+    uint8_t device_address;
 
 
 public:
@@ -162,7 +169,28 @@ public:
     */
     LS7866(uint8_t deviceAddress, I2C_HandleTypeDef *hi2c);
     bool begin();
-    bool 
+
+    // data modify
+    bool write_MDR0(uint8_t data);
+    bool write_MDR1(uint8_t data);
+    bool write_FCR(uint8_t data);
+
+    // data access
+    uint8_t read_MDR0();
+    uint8_t read_MDR1();
+    uint32_t read_CNTR();
+    uint32_t read_ODR();
+
+    // command
+    void reset_CNTR();
+    void reset_DSTR();
+    void load_ODR();
+
+
+    // Hardware specific layer, HAL functions are called here
+    bool write_reg(uint8_t address, uint8_t data, uint8_t num_bytes);
+    bool read_reg(uint8_t reg_address, uint8_t* data_buff, uint16_t num_bytes);
+
     
 };
 
