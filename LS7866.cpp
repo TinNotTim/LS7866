@@ -44,7 +44,7 @@ uint32_t LS7866::read_CNTR()
     uint32_t data; // for combine the data
     uint8_t data_buffer[data_width]
     bool err;
-    err = read_reg(LS7866_FCR, &data_buffer, data_width);
+    err = read_reg(LS7866_CNTR, &data_buffer, data_width);
     if(err){
         return 0;        
     }
