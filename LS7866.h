@@ -153,6 +153,8 @@ private:
     I2C_HandleTypeDef *i2c_hal;
     uint8_t device_address;
 
+    uint8_t data_width = 0; // data can be from 1 to 4 bytes
+
 
 public:
     /*  deviceAddress = 0x70 .. 0x77 
@@ -176,8 +178,8 @@ public:
     bool write_FCR(uint8_t data);
 
     // data access
-    uint8_t read_MDR0();
-    uint8_t read_MDR1();
+    uint8_t read_MCR0();
+    uint8_t read_MCR1();
     uint32_t read_CNTR();
     uint32_t read_ODR();
 
